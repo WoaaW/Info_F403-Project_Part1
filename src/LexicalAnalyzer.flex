@@ -1,6 +1,5 @@
 %%
 
-%standalone
 %class LexicalAnalyzer
 %unicode
 %type Symbol
@@ -47,9 +46,6 @@ WHITESPACE = [ \t\f\r\n]+
 {PROGNAME}          { return new Symbol(LexicalUnit.PROGNAME, yyline, yycolumn, yytext()); }
 
 {WHITESPACE}        { }
-
-"!!"[^!]*"!!"       { /* long comment, ignore */ }
-"$".*               { /* short comment, ignore */ }
 
 .                   { System.err.println("Unknown symbol: " + yytext()); }
 
