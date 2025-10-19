@@ -1,7 +1,6 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.*;
 
 class UnkownLexicalUnitException extends Exception {
@@ -13,24 +12,27 @@ class UnkownLexicalUnitException extends Exception {
 public class Main {
     public static void main(String args[]) {
 
+        if (args.length == 0) {
+            System.err.println("Usage: java -jar part1.jar <filename>");
+            System.exit(1);
+        }
+
         ArrayList<Symbol> variables = new ArrayList<Symbol>();
         LexicalAnalyzer lexicalAnalyzer;
+        String filename = "test/" + args[0];
 
         try {
 
-            lexicalAnalyzer = new LexicalAnalyzer(new FileReader("test/Euclid.ycc"));
+            lexicalAnalyzer = new LexicalAnalyzer(new FileReader(filename));
+            
 
             Symbol symbol;
             do {
                 symbol = lexicalAnalyzer.nextSymbol();
                 System.out.println(symbol.toString());
 
-                if (symbol.getType() == LexicalUnit.VARNAME) {
-
-                    if (!containsValue(symbol.getValue(), variables)) {
-                        variables.add(symbol);
-                    }
-
+                if (symbol.getType() == LexicalUnit.VARNAME && !containsValue(symbol.getValue(), variables)) {
+                    variables.add(symbol);
                 }
 
             } while (symbol.getType() != LexicalUnit.END);
