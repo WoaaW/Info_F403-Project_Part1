@@ -7,6 +7,7 @@
 %line
 %column
 %yylexthrow UnkownLexicalUnitException
+%xstate YYINITIAL, SHORT_COMMENT, LONG_COMMENT
 
 PROGNAME = [A-Z][a-zA-Z0-9_]*
 VARNAME = [a-z][a-zA-Z0-9]*
@@ -14,7 +15,16 @@ NUMBER = [1-9][0-9]*|0
 WHITESPACE = [ \t\f\r\n]+
 
 
+%eofval{
+    if (yystate() == LONG_COMMENT) {
+        System.out.println("Error : Long comment was not closed before EOF.");
+        System.exit(1);
+    }
+%eofval}
+
 %%
+
+<YYINITIAL> {
 
 "Prog"              { return new Symbol(LexicalUnit.PROG, yyline, yycolumn, yytext()); }
 "Is"                { return new Symbol(LexicalUnit.IS, yyline, yycolumn, yytext()); }
@@ -49,10 +59,21 @@ WHITESPACE = [ \t\f\r\n]+
 {WHITESPACE}        { }
 
 
-"!!"[^!]*"!!"       { }
-"$".*               { }
+"!!"                { yybegin(LONG_COMMENT); }
+"$"                 { yybegin(SHORT_COMMENT); }
 
-.                   { System.err.println("Unknown symbol: " + yytext()); }
+[^]                 { throw new UnkownLexicalUnitException("Unknown Symbol: " + yytext()); }
 
+}
+
+<SHORT_COMMENT> {
+    \n              { yybegin(YYINITIAL); }
+    .               { }
+}
+
+<LONG_COMMENT> {
+    "!!"            { yybegin(YYINITIAL); }
+    .|\n            { }             
+} 
 
 

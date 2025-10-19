@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.*;
 
 class UnkownLexicalUnitException extends Exception {
-    public UnkownLexicalUnitException() {
-        super();
+    public UnkownLexicalUnitException(String message) {
+        super(message);
     }
 }
 
@@ -19,7 +19,7 @@ public class Main {
 
         ArrayList<Symbol> variables = new ArrayList<Symbol>();
         LexicalAnalyzer lexicalAnalyzer;
-        String filename = "test/" + args[0];
+        String filename = args[0];
 
         try {
 
@@ -48,7 +48,7 @@ public class Main {
             e.printStackTrace();
         } catch (UnkownLexicalUnitException e) {
             // Thrown by us if an unknwon lexical unit is seen.
-            System.err.println("UnkownLexicalUnitException...");
+            System.err.println(e.getMessage());
         }
     }
 

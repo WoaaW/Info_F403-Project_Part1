@@ -1,6 +1,7 @@
 SRC_DIR = src
 TEST_DIR = test
 BUILD_DIR = dist
+TEST_FILES := $(wildcard $(TEST_DIR)/*.ycc)
 
 LEXER_SRC = $(SRC_DIR)/LexicalAnalyzer.flex
 LEXER_JAVA = $(SRC_DIR)/LexicalAnalyzer.java
@@ -24,7 +25,20 @@ compile: $(LEXER_JAVA)
 $(BUILD_DIR)/$(JAR_NAME) : compile
 
 run:
-	$(JAVA) -jar $(BUILD_DIR)/$(JAR_NAME) Euclid.ycc
+	$(JAVA) -jar $(BUILD_DIR)/$(JAR_NAME) test/Euclid.ycc
+
+
+test: compile
+	@for test_file in $(TEST_FILES); do \
+		echo "Running $$test_file"; \
+		$(JAVA) -jar $(BUILD_DIR)/$(JAR_NAME) "$$test_file"; \
+	done
+
+
+
+doc:
+	mkdir -p doc
+	javadoc -d doc src/*.java
 
 clean:
-	rm -rf $(BUILD_DIR) $(SRC_DIR)/LexicalAnalyzer.java $(SRC_DIR)/LexicalAnalyzer.java~
+	rm -rf $(BUILD_DIR) $(SRC_DIR)/LexicalAnalyzer.java $(SRC_DIR)/LexicalAnalyzer.java~ doc
