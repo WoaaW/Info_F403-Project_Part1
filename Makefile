@@ -1,28 +1,33 @@
-
+# === Directories ===
 SRC_DIR = src
 TEST_DIR = test
 BUILD_DIR = dist
 DOC_DIR = doc
 
+# === Files ===
 TEST_FILES := $(wildcard $(TEST_DIR)/*.ycc)
 LEXER_SRC = $(SRC_DIR)/LexicalAnalyzer.flex
 LEXER_JAVA = $(SRC_DIR)/LexicalAnalyzer.java
 JAR_NAME = part1.jar
 
+# === Tools ===
 JAVAC = javac
 JAVA = java
 JFLAGS = -d $(BUILD_DIR)
 
+# === Cross-platform mkdir / rm ===
+# We’ll use PowerShell-safe commands on Windows.
 ifeq ($(OS),Windows_NT)
-    MKDIR = if not exist $(1) mkdir $(1)
-    RMDIR = rmdir /s /q $(1) 2>nul || true
-    RM = del /q /f $(1) 2>nul || true
+    MKDIR = powershell -Command "New-Item -ItemType Directory -Force -Path '$(1)' | Out-Null"
+    RMDIR = powershell -Command "Remove-Item -Recurse -Force -ErrorAction SilentlyContinue '$(1)'"
+    RM = powershell -Command "Remove-Item -Force -ErrorAction SilentlyContinue '$(1)'"
 else
     MKDIR = mkdir -p $(1)
     RMDIR = rm -rf $(1)
     RM = rm -f $(1)
 endif
 
+# === Targets ===
 .PHONY: all compile run test doc clean
 
 all: $(BUILD_DIR)/$(JAR_NAME)
