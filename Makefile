@@ -1,8 +1,10 @@
+
 SRC_DIR = src
 TEST_DIR = test
 BUILD_DIR = dist
-TEST_FILES := $(wildcard $(TEST_DIR)/*.ycc)
+DOC_DIR = doc
 
+TEST_FILES := $(wildcard $(TEST_DIR)/*.ycc)
 LEXER_SRC = $(SRC_DIR)/LexicalAnalyzer.flex
 LEXER_JAVA = $(SRC_DIR)/LexicalAnalyzer.java
 JAR_NAME = part1.jar
@@ -12,11 +14,16 @@ JAVA = java
 JFLAGS = -d $(BUILD_DIR)
 
 ifeq ($(OS),Windows_NT)
-    MKDIR = mkdir doc 2>nul || true
+    MKDIR = if not exist $(1) mkdir $(1)
+    RMDIR = rmdir /s /q $(1) 2>nul || true
+    RM = del /q /f $(1) 2>nul || true
 else
-    MKDIR = mkdir -p doc
+    MKDIR = mkdir -p $(1)
+    RMDIR = rm -rf $(1)
+    RM = rm -f $(1)
 endif
 
+.PHONY: all compile run test doc clean
 
 all: $(BUILD_DIR)/$(JAR_NAME)
 
@@ -24,15 +31,14 @@ $(LEXER_JAVA): $(LEXER_SRC)
 	jflex $(LEXER_SRC)
 
 compile: $(LEXER_JAVA)
-	$(MKDIR) $(BUILD_DIR)
+	@$(call MKDIR,$(BUILD_DIR))
 	$(JAVAC) $(JFLAGS) $(SRC_DIR)/*.java
 	cd $(BUILD_DIR) && jar cfe $(JAR_NAME) Main *.class
 
-$(BUILD_DIR)/$(JAR_NAME) : compile
+$(BUILD_DIR)/$(JAR_NAME): compile
 
 run:
-	$(JAVA) -jar $(BUILD_DIR)/$(JAR_NAME) test/Euclid.ycc
-
+	$(JAVA) -jar $(BUILD_DIR)/$(JAR_NAME) $(TEST_DIR)/Euclid.ycc
 
 test: compile
 	@for test_file in $(TEST_FILES); do \
@@ -40,11 +46,11 @@ test: compile
 		$(JAVA) -jar $(BUILD_DIR)/$(JAR_NAME) "$$test_file"; \
 	done
 
-
-
 doc:
-	$(MKDIR) doc
-	javadoc -d doc src/*.java
+	@$(call MKDIR,$(DOC_DIR))
+	javadoc -d $(DOC_DIR) $(SRC_DIR)/*.java
 
 clean:
-	rm -rf $(BUILD_DIR) $(SRC_DIR)/LexicalAnalyzer.java $(SRC_DIR)/LexicalAnalyzer.java~ doc
+	@$(call RMDIR,$(BUILD_DIR))
+	@$(call RM,$(LEXER_JAVA))
+	@$(call RMDIR,$(DOC_DIR))
