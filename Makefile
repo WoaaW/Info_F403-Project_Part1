@@ -11,6 +11,12 @@ JAVAC = javac
 JAVA = java
 JFLAGS = -d $(BUILD_DIR)
 
+ifeq ($(OS),Windows_NT)
+    MKDIR = mkdir doc 2>nul || true
+else
+    MKDIR = mkdir -p doc
+endif
+
 
 all: $(BUILD_DIR)/$(JAR_NAME)
 
@@ -18,7 +24,7 @@ $(LEXER_JAVA): $(LEXER_SRC)
 	jflex $(LEXER_SRC)
 
 compile: $(LEXER_JAVA)
-	mkdir -p $(BUILD_DIR)
+	$(MKDIR) $(BUILD_DIR)
 	$(JAVAC) $(JFLAGS) $(SRC_DIR)/*.java
 	cd $(BUILD_DIR) && jar cfe $(JAR_NAME) Main *.class
 
@@ -37,7 +43,7 @@ test: compile
 
 
 doc:
-	mkdir -p doc
+	$(MKDIR) doc
 	javadoc -d doc src/*.java
 
 clean:
